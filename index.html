@@ -1,0 +1,172 @@
+﻿<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>打針指數調查</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="jquery3.7.1.js"></script>
+    <script src="jquery-ui.min.js"></script>
+    <script src="Script.js"></script>    
+</head>
+<body>
+    <div class="container">
+        <h1>打針指數調查表</h1>
+
+        <!-- Step 1: 害怕打針的指數 -->
+        <div class="step" id="step1">
+            <label for="fear-level">害怕打針的指數 (1到5):</label>
+            <select id="fear-level" name="fear-level">
+                <option value="" disabled selected>選擇一個選項</option>
+                <option value="1">1 - 不害怕</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5 - 非常害怕</option>
+            </select>
+            <br><br>
+            <button onclick="nextStep(1)">下一題</button>
+            <p id="error1" style="color:red; display:none;">請選擇一個選項。</p>
+        </div>
+
+        <!-- Step 2: 是否打過流感疫苗 -->
+        <div class="step" id="step2" style="display:none;">
+            <label>是否打過流感疫苗：</label>
+            <input type="radio" id="flu-yes" name="flu" value="yes">
+            <label for="flu-yes">是</label>
+            <input type="radio" id="flu-no" name="flu" value="no">
+            <label for="flu-no">否</label>
+            <br><br>
+            <button onclick="nextStep(2)">下一題</button>
+            <button onclick="prevStep(2)">返回上一題</button>
+            <p id="error2" style="color:red; display:none;">請選擇一個選項。</p>
+        </div>
+
+        <!-- Step 3: 是否打過 COVID-19 疫苗 -->
+        <div class="step" id="step3" style="display:none;">
+            <label>是否打過 COVID-19 疫苗：</label>
+            <input type="radio" id="covid-yes" name="covid" value="yes">
+            <label for="covid-yes">是</label>
+            <input type="radio" id="covid-no" name="covid" value="no">
+            <label for="covid-no">否</label>
+            <br><br>
+            <button onclick="nextStep(3)">下一題</button>
+            <button onclick="prevStep(3)">返回上一題</button>
+            <p id="error3" style="color:red; display:none;">請選擇一個選項。</p>
+        </div>
+
+        <!-- Step 4: 打過最痛的針 -->
+        <div class="step" id="step4" style="display:none;">
+            <label for="most-painful">打過最痛的針是什麼：</label>
+            <input type="text" id="most-painful" name="most-painful">
+            <br><br>
+            <button onclick="showSummary()">顯示總結</button>
+            <button onclick="prevStep(4)">返回上一題</button>
+            <p id="error4" style="color:red; display:none;">請填寫此欄位。</p>
+        </div>
+
+        <!-- Step 5: 總結 -->
+        <div class="step" id="step5" style="display:none;">
+            <h2>總結</h2>
+            <p id="summary"></p>
+            <button onclick="submitForm()">確認並提交</button>
+            <button onclick="goBack()">返回修改</button>
+        </div>
+    </div>
+
+    <script>
+        // 檢查問題是否已回答
+        function nextStep(step) {
+            let isValid = false;
+            let error = document.getElementById('error' + step);
+            error.style.display = 'none'; // 隱藏錯誤信息
+
+            if (step === 1) {
+                const fearLevel = document.getElementById('fear-level').value;
+                if (fearLevel !== "") {
+                    isValid = true;
+                }
+            } else if (step === 2) {
+                const fluYes = document.getElementById('flu-yes').checked;
+                const fluNo = document.getElementById('flu-no').checked;
+                if (fluYes || fluNo) {
+                    isValid = true;
+                }
+            } else if (step === 3) {
+                const covidYes = document.getElementById('covid-yes').checked;
+                const covidNo = document.getElementById('covid-no').checked;
+                if (covidYes || covidNo) {
+                    isValid = true;
+                }
+            }
+
+            // 如果通過驗證，顯示下一題
+            if (isValid) {
+                document.getElementById('step' + step).style.display = 'none';
+                document.getElementById('step' + (step + 1)).style.display = 'block';
+            } else {
+                error.style.display = 'block'; // 顯示錯誤信息
+            }
+        }
+
+        // 返回上一題
+        function prevStep(step) {
+            document.getElementById('step' + step).style.display = 'none';
+            document.getElementById('step' + (step - 1)).style.display = 'block';
+        }
+
+        // 顯示總結
+        function showSummary() {
+            const mostPainful = document.getElementById('most-painful').value;
+            const error = document.getElementById('error4');
+            error.style.display = 'none'; // 隱藏錯誤信息
+
+            if (mostPainful.trim() !== "") {
+                // 收集所有的回答
+                const fearLevel = document.getElementById('fear-level').value;
+                const flu = document.querySelector('input[name="flu"]:checked').value;
+                const covid = document.querySelector('input[name="covid"]:checked').value;
+
+                // 顯示總結
+                const summaryText = `
+                    <strong>害怕打針的指數：</strong> ${fearLevel}<br>
+                    <strong>是否打過流感疫苗：</strong> ${flu === 'yes' ? '是' : '否'}<br>
+                    <strong>是否打過 COVID-19 疫苗：</strong> ${covid === 'yes' ? '是' : '否'}<br>
+                    <strong>打過最痛的針是：</strong> ${mostPainful}
+                `;
+                document.getElementById('summary').innerHTML = summaryText;
+
+                // 顯示總結步驟
+                document.getElementById('step4').style.display = 'none';
+                document.getElementById('step5').style.display = 'block';
+            } else {
+                error.style.display = 'block'; // 顯示錯誤信息
+            }
+        }
+
+        // 返回修改
+        function goBack() {
+            document.getElementById('step5').style.display = 'none';
+            document.getElementById('step4').style.display = 'block';
+        }
+
+        // 提交表單
+        function submitForm() {
+            alert('表單已提交！');
+            // 在這裡可以添加真正的表單提交邏輯
+        }
+    </script>
+
+<script>
+    $(document).ready(function() {
+        $(".next-button").click(function() {
+  $(".current-page").fadeOut(function() {
+    $(".next-page").fadeIn().addClass("current-page").removeClass("next-page");
+  });
+});
+      console.log("jQuery is working!");
+    });
+  </script>
+     
+</body>
+</html>
